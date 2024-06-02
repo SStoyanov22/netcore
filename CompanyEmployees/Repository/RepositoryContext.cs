@@ -8,13 +8,13 @@ namespace Repository
     {
         public RepositoryContext(DbContextOptions options) : base(options)
         {
-        
+            
         }
 
-        protected override  void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            builder.ApplyConfiguration(new CompanyConfiguration());
-            builder.ApplyConfiguration(new EmployeeConfiguration());
+            modelBuilder.ApplyConfiguration(new CompanyConfiguration());
+            modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
         }
         
         public DbSet<Company?> Companies { get; set;}
