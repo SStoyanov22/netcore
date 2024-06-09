@@ -24,8 +24,8 @@ namespace CompanyEmployees
                 httpContext.Response.StatusCode = contextFeature.Error switch
                 {
                     NotFoundException => StatusCodes.Status404NotFound,
-                    _
-                    => StatusCodes.Status500InternalServerError
+                    BadRequestException => StatusCodes.Status400BadRequest,
+                    _ => StatusCodes.Status500InternalServerError
                 };
 
                 _logger.LogError($"Something went wrong: {exception.Message}");
