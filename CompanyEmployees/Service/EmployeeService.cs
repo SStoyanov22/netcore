@@ -73,4 +73,18 @@ public EmployeeService(IRepositoryManager repository,
         
         return employeesDto;
     }
+
+    public void UpdateEmployeeForCompany(Guid companyId, Guid employeeId, EmployeeForUpdateDto employeeForUpdate, bool compTrackChanges, bool empTrackChanges)
+    {
+        var company = _repository.Company.GetCompany(companyId, compTrackChanges);
+        if (company is null)
+            throw new CompanyNotFoundException(companyId);
+        
+        var employee = _repository.Employee.GetEmployee(companyId, employeeId, empTrackChanges);
+        if (employee is null)
+            throw new EmployeeNotFoundException(employeeId);
+        
+        _mapper.Map(employeeForUpdate, employee);
+        _repository.Save();
+    }
 }
