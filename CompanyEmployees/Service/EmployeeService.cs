@@ -64,14 +64,17 @@ public EmployeeService(IRepositoryManager repository,
         return (employeeToPatch, employee);
     }
 
-    public async Task<(PagedList<EmployeeDto> employees, MetaData metaData)> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters,bool trackChanges)
+    public async Task<(IEnumerable<EmployeeDto> employees, MetaData metaData)> GetEmployeesAsync
+        (Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
     {
+        if (!employeeParameters.ValidAgeRange)
+            throw new MaxAgeRangeBadRequestException();
+            
         await CheckIfCompanyExists(companyId, trackChanges);
-        
+
         var employeesWithMetaData = await _repository.Employee
-        .GetEmployeesAsync(companyId, employeeParameters, trackChanges);
-        var employeesDto =
-        _mapper.Map<PagedList<EmployeeDto>>(employeesWithMetaData);
+            .GetEmployeesAsync(companyId, employeeParameters, trackChanges);
+        var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesWithMetaData);
 
         return (employees: employeesDto, metaData: employeesWithMetaData.MetaData);
     }
