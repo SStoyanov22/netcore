@@ -25,6 +25,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true;

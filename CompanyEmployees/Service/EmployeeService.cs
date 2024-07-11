@@ -2,6 +2,7 @@ using System.Dynamic;
 using AutoMapper;
 using Contracts;
 using Entities.Exceptions;
+using Entities.LinkModels;
 using Entities.Models;
 using Service.Contracts;
 using Shared.DataTransferObjects;
@@ -14,29 +15,34 @@ private readonly IRepositoryManager _repository;
 private readonly ILoggerManager _logger;
 private readonly IMapper _mapper;
 private readonly IDataShaper<EmployeeDto> _dataShaper;
+private readonly IEmployeeLinks _employeeLinks;
 public EmployeeService(IRepositoryManager repository, 
                         ILoggerManager logger,
                         IMapper mapper,
-                        IDataShaper<EmployeeDto> dataShaper)
+                        IEmployeeLinks employeeLinks)
     {
         _repository = repository;
         _logger = logger;
         _mapper = mapper;
-        _dataShaper = dataShaper;
+        _employeeLinks = employeeLinks;
     }
 
-    public async Task<EmployeeDto> CreateEmployeeFromCompanyAsync(Guid companyId, EmployeeForCreationDto employeeForCreation, bool trackChanges)
+    public async Task<(LinkResponse linkResponse, MetaData metaData)> GetEmployeesAsync
+        (Guid companyId, LinkParameters linkParameters, bool trackChanges)
     {
+        if (!linkParameters.EmployeeParameters.ValidAgeRange)
+            throw new MaxAgeRangeBadRequestException();
+
         await CheckIfCompanyExists(companyId, trackChanges);
-        
-        var employeeEntity = _mapper.Map<Employee>(employeeForCreation);
-        _repository.Employee.CreateEmployeeForCompany(companyId, employeeEntity);
-        await _repository.SaveAsync();
+        var employeesWithMetaData = await _repository.Employee
+            .GetEmployeesAsync(companyId, linkParameters.EmployeeParameters, trackChanges);
+        var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesWithMetaData);
+        var links = _employeeLinks.TryGenerateLinks(employeesDto,
+            linkParameters.EmployeeParameters.Fields,
+            companyId, linkParameters.Context);
 
-        var employeeToReturn = _mapper.Map<EmployeeDto>(employeeEntity);
-
-        return employeeToReturn;
-    }
+        return (linkResponse: links, metaData: employeesWithMetaData.MetaData);
+}
 
     public async Task DeleteEmployeeForCompanyAsync(Guid companyId, Guid employeeId, bool trackChanges)
     {
@@ -66,22 +72,6 @@ public EmployeeService(IRepositoryManager repository,
     var employeeToPatch = _mapper.Map<EmployeeForUpdateDto>(employee);
 
         return (employeeToPatch, employee);
-    }
-
-    public async Task<(IEnumerable<Entity> employees, MetaData metaData)> GetEmployeesAsync
-        (Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
-    {
-        if (!employeeParameters.ValidAgeRange)
-            throw new MaxAgeRangeBadRequestException();
-
-        await CheckIfCompanyExists(companyId, trackChanges);
-
-        var employeesWithMetaData = await _repository.Employee
-            .GetEmployeesAsync(companyId, employeeParameters, trackChanges);
-        var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesWithMetaData);
-        var shapedData = _dataShaper.ShapeData(employeesDto, employeeParameters.Fields);
-
-        return (employees: shapedData, metaData: employeesWithMetaData.MetaData);
     }
 
     public async Task SaveChangesForPatchAsync(EmployeeForUpdateDto employeeToPatch, Employee employeeEntity)
@@ -114,5 +104,19 @@ public EmployeeService(IRepositoryManager repository,
             throw new EmployeeNotFoundException(id);
 
         return employeeDb;
+    }
+    public async Task<EmployeeDto> CreateEmployeeForCompanyAsync(Guid companyId,
+        EmployeeForCreationDto employeeForCreation, bool trackChanges)
+    {
+        await CheckIfCompanyExists(companyId, trackChanges);
+
+        var employeeEntity = _mapper.Map<Employee>(employeeForCreation);
+
+        _repository.Employee.CreateEmployeeForCompany(companyId, employeeEntity);
+        await _repository.SaveAsync();
+
+        var employeeToReturn = _mapper.Map<EmployeeDto>(employeeEntity);
+
+        return employeeToReturn;
     }
 }
