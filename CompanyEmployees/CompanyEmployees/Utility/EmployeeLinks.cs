@@ -24,8 +24,9 @@ public class EmployeeLinks : IEmployeeLinks
     private bool ShouldGenerateLinks(HttpContext httpContext)
     {
         var mediaType = (MediaTypeHeaderValue)httpContext.Items["AcceptHeaderMediaType"];
+
         return mediaType.SubTypeWithoutSuffix.EndsWith("hateoas",
-        StringComparison.InvariantCultureIgnoreCase);
+            StringComparison.InvariantCultureIgnoreCase);
     }
 
     private LinkResponse ReturnShapedEmployees(List<Entity> shapedEmployees) =>
@@ -92,6 +93,7 @@ public class EmployeeLinks : IEmployeeLinks
     fields, Guid companyId, HttpContext httpContext)
     {
         var shapedEmployees = ShapeData(employeesDto, fields);
+
         if (ShouldGenerateLinks(httpContext))
             return ReturnLinkdedEmployees(employeesDto, fields, companyId, httpContext,
                 shapedEmployees);

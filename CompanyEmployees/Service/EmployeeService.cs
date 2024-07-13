@@ -34,11 +34,12 @@ public EmployeeService(IRepositoryManager repository,
             throw new MaxAgeRangeBadRequestException();
 
         await CheckIfCompanyExists(companyId, trackChanges);
+
         var employeesWithMetaData = await _repository.Employee
             .GetEmployeesAsync(companyId, linkParameters.EmployeeParameters, trackChanges);
+
         var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesWithMetaData);
-        var links = _employeeLinks.TryGenerateLinks(employeesDto,
-            linkParameters.EmployeeParameters.Fields,
+        var links = _employeeLinks.TryGenerateLinks(employeesDto, linkParameters.EmployeeParameters.Fields,
             companyId, linkParameters.Context);
 
         return (linkResponse: links, metaData: employeesWithMetaData.MetaData);
@@ -80,7 +81,8 @@ public EmployeeService(IRepositoryManager repository,
         await _repository.SaveAsync();
     }
 
-    public async Task UpdateEmployeeForCompanyAsync(Guid companyId, Guid employeeId, EmployeeForUpdateDto employeeForUpdate, bool compTrackChanges, bool empTrackChanges)
+    public async Task UpdateEmployeeForCompanyAsync(
+        Guid companyId, Guid employeeId, EmployeeForUpdateDto employeeForUpdate, bool compTrackChanges, bool empTrackChanges)
     {
         
         var employee = await GetEmployeeForCompanyAndCheckIfItExists(companyId, employeeId,empTrackChanges);

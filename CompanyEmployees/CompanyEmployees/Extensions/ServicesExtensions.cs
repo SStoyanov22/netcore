@@ -51,6 +51,7 @@ namespace CompanyEmployees.Extensions;
 				var systemTextJsonOutputFormatter = config.OutputFormatters
 					.OfType<SystemTextJsonOutputFormatter>()?
 					.FirstOrDefault();
+				
 				if (systemTextJsonOutputFormatter != null)
 				{
 					systemTextJsonOutputFormatter.SupportedMediaTypes

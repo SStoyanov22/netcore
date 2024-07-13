@@ -25,6 +25,7 @@ public class EmployeesController: ControllerBase
     }
 
     [HttpGet]
+    [HttpHead]
     [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
     public async Task<IActionResult> GetEmployeesForCompany(Guid companyId,
         [FromQuery] EmployeeParameters employeeParameters)
@@ -32,13 +33,13 @@ public class EmployeesController: ControllerBase
         var linkParams = new LinkParameters(employeeParameters, HttpContext);
 
         var result = await _service.EmployeeService.GetEmployeesAsync(companyId,
-        linkParams, trackChanges: false);
+            linkParams, trackChanges: false);
 
         Response.Headers.Add("X-Pagination",
             JsonSerializer.Serialize(result.metaData));
 
-            return result.linkResponse.HasLinks ? 
-            Ok(result.linkResponse.LinkedEntities) : Ok(result.linkResponse.ShapedEntities);
+        return result.linkResponse.HasLinks ? Ok(result.linkResponse.LinkedEntities) :
+            Ok(result.linkResponse.ShapedEntities);
     }
     
     [HttpPost]
