@@ -40,6 +40,9 @@ namespace CompanyEmployees.Extensions;
 				services.AddDbContext<RepositoryContext>(
 					opts =>
 					opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
+					
+		public static void ConfigureResponseCaching(this IServiceCollection services) =>
+			services.AddResponseCaching();
 		public static IMvcBuilder AddCustomCSVFormatter(
 			this IMvcBuilder builder) =>
 				builder.AddMvcOptions(
