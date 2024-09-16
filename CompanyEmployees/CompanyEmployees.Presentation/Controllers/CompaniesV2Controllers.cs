@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
 namespace CompanyEmployees.Presentation.Controllers;
-[ApiVersion("2.0", Deprecated = true)]
-[Route("api/{v:apiversion}/companies")]
+[Route("apis/companies")]
 [ApiController]
 public class CompaniesV2Controller : ControllerBase
 {

@@ -40,7 +40,7 @@ namespace CompanyEmployees.Extensions;
 				services.AddDbContext<RepositoryContext>(
 					opts =>
 					opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
-					
+
 		public static void ConfigureResponseCaching(this IServiceCollection services) =>
 			services.AddResponseCaching();
 		public static IMvcBuilder AddCustomCSVFormatter(
@@ -80,13 +80,13 @@ namespace CompanyEmployees.Extensions;
 				opt.ReportApiVersions = true;
 				opt.AssumeDefaultVersionWhenUnspecified = true;
 				opt.DefaultApiVersion = new ApiVersion(1, 0);
-				//opt.ApiVersionReader = new HeaderApiVersionReader("api-version");
+				opt.ApiVersionReader = new HeaderApiVersionReader("api-version");
 			}).AddMvc(opt =>
 			{
-			opt.Conventions.Controller<CompaniesController>()
-			.HasApiVersion(new ApiVersion(1, 0));
-			opt.Conventions.Controller<CompaniesV2Controller>()
-			.HasDeprecatedApiVersion(new ApiVersion(2, 0));
+				opt.Conventions.Controller<CompaniesController>()
+					.HasApiVersion(new ApiVersion(1, 0));
+				opt.Conventions.Controller<CompaniesV2Controller>()
+					.HasDeprecatedApiVersion(new ApiVersion(2, 0));
 			});
 			
 		}
